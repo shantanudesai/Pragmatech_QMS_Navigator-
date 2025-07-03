@@ -1,0 +1,26 @@
+<svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="pcpBrandGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4FC3F7;stop-opacity:1" />
+      <stop offset="35%" style="stop-color:#42A5F5;stop-opacity:1" />
+      <stop offset="65%" style="stop-color:#5C6BC0;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#8E24AA;stop-opacity:1" />
+    </linearGradient>
+    <filter id="logoShadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="rgba(0,0,0,0.15)"/>
+    </filter>
+  </defs>
+  
+  <!-- Simple shield shape -->
+  <path d="M6 8C6 6.9 6.9 6 8 6H40C41.1 6 42 6.9 42 8V22C42 26.5 39.5 30.8 35.2 33.8L24 42L12.8 33.8C8.5 30.8 6 26.5 6 22V8Z" 
+        fill="url(#pcpBrandGradient)" 
+        filter="url(#logoShadow)"/>
+  
+  <!-- Clean checkmark -->
+  <path d="M15 20L21 26L33 14" 
+        stroke="white" 
+        stroke-width="3" 
+        stroke-linecap="round" 
+        stroke-linejoin="round" 
+        fill="none"/>
+</svg> 

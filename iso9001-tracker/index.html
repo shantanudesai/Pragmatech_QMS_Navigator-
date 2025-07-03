@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PragmaTech Compliance Partners - ISO 9001 Project Tracker</title>
+    <meta name="description" content="Interactive ISO 9001 implementation project tracker for quality management system certification">
+    
+    <!-- External CDN Dependencies -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1.11.7/dayjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1.11.7/plugin/duration.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1.11.7/plugin/relativeTime.min.js"></script>
+    
+    <!-- Local Stylesheets -->
+    <link rel="stylesheet" href="styles.css">
+    
+    <!-- Favicon and Touch Icons -->
+    <link rel="icon" type="image/x-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect fill='%233B82F6' width='64' height='64' rx='12'/><text x='32' y='40' font-family='Arial,sans-serif' font-size='28' font-weight='bold' text-anchor='middle' fill='white'>9001</text></svg>">
+</head>
+<body>
+    <div id="app" class="app">
+        <!-- Header Section -->
+        <header class="app-header">
+            <div class="header-content">
+                <div class="header-branding">
+                    <div class="logo">
+                        <div class="logo-icon">
+                            <img src="pcp-logo.svg" alt="PragmaTech Compliance Partners Logo" class="pcp-logo">
+                        </div>
+                        <div class="logo-text">
+                            <h1 class="company-name">PragmaTech Compliance Partners</h1>
+                            <h2 class="product-name">ISO 9001 Project Tracker</h2>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="header-controls">
+                    <div class="control-group">
+                        <label for="project-start-date">Project Start Date:</label>
+                        <input 
+                            type="text" 
+                            id="project-start-date" 
+                            class="date-input"
+                            placeholder="Select start date..."
+                            readonly
+                        >
+                    </div>
+                    
+                    <div class="control-group">
+                        <div class="action-buttons">
+                            <button id="export-btn" class="btn btn-secondary" title="Export project data">
+                                📥 Export
+                            </button>
+                            <button id="import-btn" class="btn btn-secondary" title="Import project data">
+                                📤 Import
+                            </button>
+                            <button id="reset-btn" class="btn btn-danger" title="Reset all progress">
+                                🔄 Reset
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Hidden file input for import -->
+            <input type="file" id="import-file" accept=".json" style="display: none;">
+        </header>
+
+        <!-- Progress Overview Section -->
+        <section class="progress-overview">
+            <div class="progress-container">
+                <div class="progress-header">
+                    <h2>Overall Progress</h2>
+                    <div class="progress-stats">
+                        <span id="progress-text">0 / 0 tasks completed (0%)</span>
+                        <span id="timeline-text" class="timeline-info"></span>
+                    </div>
+                </div>
+                
+                <div class="progress-bar-container">
+                    <div class="progress-bar">
+                        <div id="progress-fill" class="progress-fill" style="width: 0%"></div>
+                    </div>
+                </div>
+                
+                <div class="phase-timeline" id="phase-timeline">
+                    <!-- Timeline will be generated dynamically -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Main Content - Project Phases -->
+        <main class="main-content">
+            <div class="phases-container" id="phases-container">
+                <!-- Phases will be generated dynamically from JavaScript -->
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="app-footer">
+            <div class="footer-content">
+                <div class="footer-branding">
+                    <p>&copy; 2025 PragmaTech Compliance Partners</p>
+                </div>
+                
+                <div class="footer-links">
+                    <a href="https://pragmatech-compliance-partners.vercel.app/" target="_blank" rel="noopener">
+                        Visit Our Website
+                    </a>
+                    <span class="separator">|</span>
+                    <a href="mailto:pragmaticcompliancepartners@gmail.com">
+                        Contact Us
+                    </a>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Security Overlay -->
+    <div id="securityOverlay" class="security-overlay">
+        <div class="security-background">
+            <div class="logo-pattern"></div>
+        </div>
+        <div class="login-modal">
+            <div class="login-header">
+                <div class="login-logo">
+                    <img src="pcp-logo.svg" alt="PragmaTech Compliance Partners" class="login-logo-img">
+                </div>
+                <h2 class="company-brand">
+                    <span class="pragma-text">Pragmatech</span><br>
+                    <span class="compliance-text">Compliance Partners</span>
+                </h2>
+                <p>ISO 9001 Project Tracker</p>
+            </div>
+            <div class="login-form">
+                <div class="input-group">
+                    <label for="loginPassword">Enter Access Password</label>
+                    <input type="password" id="loginPassword" placeholder="Password" autocomplete="current-password">
+                </div>
+                <button type="button" id="loginSubmit" class="btn btn-login">Access Tool</button>
+                <div id="loginError" class="login-error" style="display: none;">
+                    Incorrect password. Please try again.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay" style="display: none;">
+        <div class="loading-spinner">
+            <div class="spinner"></div>
+            <p>Processing...</p>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div id="confirmation-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-title">Confirm Action</h3>
+                <button class="modal-close" id="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p id="modal-message">Are you sure you want to proceed?</p>
+            </div>
+            <div class="modal-footer">
+                <button id="modal-cancel" class="btn btn-secondary">Cancel</button>
+                <button id="modal-confirm" class="btn btn-primary">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications Container -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- Scripts -->
+    <script src="iso9001_plan.js"></script>
+    <script src="app.js"></script>
+    
+    <!-- Initialize DayJS plugins -->
+    <script>
+        dayjs.extend(dayjs_plugin_duration);
+        dayjs.extend(dayjs_plugin_relativeTime);
+    </script>
+</body>
+</html> 
