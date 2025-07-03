@@ -25,12 +25,8 @@ class ISO9001Tracker {
      * Initialize the application
      */
     init() {
-        // Wait for DOM to be fully loaded
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', () => this.initializeSecurity());
-        } else {
-            this.initializeSecurity();
-        }
+        // Initialize security immediately
+        this.initializeSecurity();
     }
 
     /**
@@ -43,6 +39,16 @@ class ISO9001Tracker {
             this.showSecurityOverlay();
         } catch (error) {
             console.error('Failed to initialize security:', error);
+            // Ensure security overlay is shown even if there's an error
+            const overlay = document.getElementById('securityOverlay');
+            if (overlay) {
+                overlay.style.display = 'flex';
+            }
+            // Ensure main app is secured
+            const app = document.getElementById('app');
+            if (app) {
+                app.classList.add('secured');
+            }
         }
     }
 
@@ -808,6 +814,13 @@ class ISO9001Tracker {
 
 // Initialize the application when the script loads
 let tracker;
-document.addEventListener('DOMContentLoaded', () => {
+
+// Ensure immediate initialization regardless of document state
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+        tracker = new ISO9001Tracker();
+    });
+} else {
+    // DOM is already ready
     tracker = new ISO9001Tracker();
-}); 
+} 
