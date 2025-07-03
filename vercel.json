@@ -12,6 +12,22 @@
     {
       "source": "/tracker",
       "destination": "/iso9001-tracker/index.html"
+    },
+    {
+      "source": "/styles.css",
+      "destination": "/iso9001-tracker/styles.css"
+    },
+    {
+      "source": "/app.js",
+      "destination": "/iso9001-tracker/app.js"
+    },
+    {
+      "source": "/iso9001_plan.js",
+      "destination": "/iso9001-tracker/iso9001_plan.js"
+    },
+    {
+      "source": "/pcp-logo.svg",
+      "destination": "/iso9001-tracker/pcp-logo.svg"
     }
   ],
   "headers": [
