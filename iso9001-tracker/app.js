@@ -182,6 +182,7 @@ class ISO9001Tracker {
             exportBtn: document.getElementById('export-btn'),
             importBtn: document.getElementById('import-btn'),
             resetBtn: document.getElementById('reset-btn'),
+            logoutBtn: document.getElementById('logout-btn'),
             importFile: document.getElementById('import-file'),
             confirmationModal: document.getElementById('confirmation-modal'),
             modalTitle: document.getElementById('modal-title'),
@@ -302,6 +303,9 @@ class ISO9001Tracker {
         
         // Reset functionality
         this.elements.resetBtn.addEventListener('click', () => this.showResetConfirmation());
+        
+        // Logout functionality
+        this.elements.logoutBtn.addEventListener('click', () => this.showLogoutConfirmation());
         
         // Modal events
         this.elements.modalClose.addEventListener('click', () => this.hideModal());
@@ -523,6 +527,15 @@ class ISO9001Tracker {
             });
         });
 
+        // Enhanced: Add howTo toggle event listeners
+        const howToToggles = phaseCard.querySelectorAll('.howto-toggle');
+        howToToggles.forEach(toggle => {
+            toggle.addEventListener('click', (e) => {
+                const activityId = e.target.dataset.activityId;
+                this.toggleHowTo(activityId);
+            });
+        });
+
         return phaseCard;
     }
 
@@ -544,19 +557,48 @@ class ISO9001Tracker {
     }
 
     /**
-     * Create activity HTML
+     * Create activity HTML with enhanced howTo guidance
      */
     createActivityHTML(activity) {
         const isCompleted = this.state.activities.get(activity.id);
+        
+        // Enhanced: Include howTo guidance if available
+        const howToContent = activity.howTo ? `
+            <div class="activity-howto">
+                <div class="howto-header">
+                    <span class="howto-toggle" data-activity-id="${activity.id}">
+                        📋 Implementation Guide
+                    </span>
+                </div>
+                <div class="howto-content" data-activity-id="${activity.id}" style="display: none;">
+                    <div class="howto-section">
+                        <div class="howto-label">📜 ISO/IATF Clauses:</div>
+                        <div class="howto-text iso-clause">${activity.howTo.isoClause}</div>
+                    </div>
+                    <div class="howto-section">
+                        <div class="howto-label">📝 Detailed Guide:</div>
+                        <div class="howto-text detailed-guide">${activity.howTo.detailedGuide}</div>
+                    </div>
+                    <div class="howto-section">
+                        <div class="howto-label">💡 Example:</div>
+                        <div class="howto-text example">${activity.howTo.example}</div>
+                    </div>
+                </div>
+            </div>
+        ` : '';
+
         return `
             <div class="activity-item ${isCompleted ? 'completed' : ''}">
-                <div class="activity-checkbox ${isCompleted ? 'checked' : ''}" 
-                     data-activity-id="${activity.id}"
-                     role="checkbox"
-                     aria-checked="${isCompleted}"
-                     tabindex="0">
+                <div class="activity-main">
+                    <div class="activity-checkbox ${isCompleted ? 'checked' : ''}" 
+                         data-activity-id="${activity.id}"
+                         role="checkbox"
+                         aria-checked="${isCompleted}"
+                         tabindex="0">
+                    </div>
+                    <div class="activity-text">${activity.text}</div>
                 </div>
-                <div class="activity-text">${activity.text}</div>
+                ${howToContent}
             </div>
         `;
     }
@@ -600,6 +642,21 @@ class ISO9001Tracker {
         
         const action = !currentStatus ? 'completed' : 'uncompleted';
         this.showToast(`Task ${action}`, 'success');
+    }
+
+    /**
+     * Enhanced: Toggle howTo content visibility for activities
+     */
+    toggleHowTo(activityId) {
+        const howToContent = document.querySelector(`.howto-content[data-activity-id="${activityId}"]`);
+        const howToToggle = document.querySelector(`.howto-toggle[data-activity-id="${activityId}"]`);
+        
+        if (howToContent && howToToggle) {
+            const isVisible = howToContent.style.display !== 'none';
+            howToContent.style.display = isVisible ? 'none' : 'block';
+            howToToggle.textContent = isVisible ? '📋 Implementation Guide' : '📋 Hide Guide';
+            howToToggle.classList.toggle('expanded', !isVisible);
+        }
     }
 
     /**
@@ -748,6 +805,72 @@ class ISO9001Tracker {
         this.render();
         this.saveStateToStorage();
         this.showToast('Project reset successfully', 'success');
+    }
+
+    /**
+     * Show logout confirmation
+     */
+    showLogoutConfirmation() {
+        this.showConfirmation(
+            'Logout Confirmation',
+            'Your progress is automatically saved. Are you sure you want to logout and return to the login screen?',
+            () => this.logout()
+        );
+    }
+
+    /**
+     * Logout and return to login screen
+     */
+    logout() {
+        try {
+            // Reset authentication state
+            this.state.isAuthenticated = false;
+            
+            // Clear password input and reset security elements
+            if (this.securityElements && this.securityElements.passwordInput) {
+                this.securityElements.passwordInput.value = '';
+            }
+            
+            // Ensure security overlay is properly reset and shown
+            const app = document.getElementById('app');
+            const overlay = document.getElementById('securityOverlay');
+            
+            console.log('Logout: app element found:', !!app);
+            console.log('Logout: overlay element found:', !!overlay);
+            
+            if (app && overlay) {
+                // Add secured class to blur main content
+                app.classList.add('secured');
+                
+                // Remove any hidden class and show overlay
+                overlay.classList.remove('hidden');
+                overlay.style.display = 'flex';
+                overlay.style.visibility = 'visible';
+                overlay.style.opacity = '1';
+                
+                console.log('Logout: Security overlay should now be visible');
+                
+                // Auto-focus password input after a short delay
+                setTimeout(() => {
+                    if (this.securityElements && this.securityElements.passwordInput) {
+                        this.securityElements.passwordInput.focus();
+                        console.log('Logout: Password input focused');
+                    }
+                }, 200);
+            } else {
+                console.error('Logout: Could not find required elements', { app: !!app, overlay: !!overlay });
+            }
+            
+            // Show success message after a brief delay to ensure overlay is shown
+            setTimeout(() => {
+                this.showToast('Logged out successfully. Your progress has been saved.', 'success');
+            }, 300);
+            
+        } catch (error) {
+            console.error('Error during logout:', error);
+            // Fallback: reload the page to ensure clean state
+            window.location.reload();
+        }
     }
 
     /**

@@ -312,6 +312,21 @@ p {
     box-shadow: 0 4px 12px rgba(220, 38, 38, 0.2);
 }
 
+.btn-warning {
+    background-color: rgba(217, 119, 6, 0.2);
+    color: #fcd34d;
+    border: 1px solid rgba(217, 119, 6, 0.3);
+    backdrop-filter: blur(10px);
+}
+
+.btn-warning:hover:not(:disabled) {
+    background-color: rgba(217, 119, 6, 0.3);
+    border-color: rgba(217, 119, 6, 0.5);
+    color: #fde047;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(217, 119, 6, 0.2);
+}
+
 /* ========== Progress Overview Styles ========== */
 .progress-overview {
     background-color: white;
@@ -642,11 +657,17 @@ p {
 /* ========== Activity Styles ========== */
 .activity-item {
     display: flex;
-    align-items: flex-start;
-    gap: var(--space-3);
+    flex-direction: column;
+    gap: var(--space-2);
     padding: var(--space-3) 0;
     border-bottom: 1px solid var(--gray-200);
     transition: all var(--transition-normal);
+}
+
+.activity-main {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
 }
 
 .activity-item:last-child {
@@ -705,6 +726,102 @@ p {
 .activity-item.completed .activity-text {
     color: var(--gray-500);
     text-decoration: line-through;
+}
+
+/* ========== Enhanced: HowTo Guide Styles ========== */
+.activity-howto {
+    margin-top: var(--space-2);
+    margin-left: 23px; /* Align with activity text */
+}
+
+.howto-header {
+    margin-bottom: var(--space-2);
+}
+
+.howto-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    font-size: 0.875rem;
+    color: var(--accent-color);
+    cursor: pointer;
+    padding: var(--space-1) var(--space-2);
+    border: 1px solid var(--accent-color);
+    border-radius: var(--radius);
+    background-color: transparent;
+    transition: all var(--transition-normal);
+    user-select: none;
+}
+
+.howto-toggle:hover {
+    background-color: var(--accent-color);
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(14, 165, 233, 0.2);
+}
+
+.howto-toggle.expanded {
+    background-color: var(--accent-color);
+    color: white;
+}
+
+.howto-content {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-lg);
+    padding: var(--space-4);
+    margin-top: var(--space-2);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.howto-section {
+    margin-bottom: var(--space-4);
+}
+
+.howto-section:last-child {
+    margin-bottom: 0;
+}
+
+.howto-label {
+    font-weight: 600;
+    font-size: 0.875rem;
+    color: var(--primary-color);
+    margin-bottom: var(--space-2);
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+}
+
+.howto-text {
+    font-size: 0.875rem;
+    line-height: 1.6;
+    color: var(--gray-700);
+}
+
+.howto-text.iso-clause {
+    font-family: var(--font-family-mono);
+    background-color: var(--gray-100);
+    padding: var(--space-2);
+    border-radius: var(--radius);
+    border-left: 3px solid var(--accent-color);
+    font-weight: 500;
+    color: var(--primary-color);
+}
+
+.howto-text.detailed-guide {
+    background-color: white;
+    padding: var(--space-3);
+    border-radius: var(--radius);
+    border: 1px solid var(--gray-200);
+}
+
+.howto-text.example {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    padding: var(--space-3);
+    border-radius: var(--radius);
+    border-left: 3px solid var(--warning-color);
+    font-style: italic;
+    color: var(--gray-800);
 }
 
 /* ========== Footer Styles ========== */
@@ -1305,6 +1422,22 @@ p {
         margin: 0 calc(-1 * var(--space-4));
         padding-left: var(--space-4);
         padding-right: var(--space-4);
+    }
+    
+    /* Enhanced: Mobile howTo styles */
+    .activity-howto {
+        margin-left: 0;
+    }
+    
+    .howto-content {
+        padding: var(--space-3);
+    }
+    
+    .howto-text.iso-clause,
+    .howto-text.detailed-guide,
+    .howto-text.example {
+        padding: var(--space-2);
+        font-size: 0.8rem;
     }
 }
 

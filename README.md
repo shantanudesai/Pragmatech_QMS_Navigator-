@@ -1,12 +1,12 @@
-# PragmaTech Compliance Partners - ISO 9001 Project Tracker
+# PragmaTech Compliance Partners - ISO 9001/IATF 16949 Project Tracker
 
-A comprehensive, interactive web-based tool for managing ISO 9001 quality management system implementation projects. Designed specifically for compliance consultants and their clients to track progress through the complete ISO 9001 certification journey.
+A comprehensive, interactive web-based tool for managing ISO 9001/IATF 16949 quality management system implementation projects. Designed specifically for automotive suppliers and compliance consultants to track progress through the complete certification journey with detailed implementation guidance.
 
 ![PragmaTech Logo](iso9001-tracker/pcp-logo.svg)
 
 ## 🎯 Overview
 
-This professional-grade project tracker converts the complex ISO 9001 implementation process into an intuitive, interactive checklist system with timeline management, progress tracking, and data persistence capabilities.
+This professional-grade project tracker converts the complex ISO 9001/IATF 16949 implementation process into an intuitive, interactive checklist system with timeline management, progress tracking, detailed implementation guidance, and data persistence capabilities.
 
 ## ✨ Features
 
@@ -16,14 +16,16 @@ This professional-grade project tracker converts the complex ISO 9001 implementa
 
 ### 📊 **Project Management**
 - **9 Implementation Phases**: From Project Initiation to Post-Certification Maintenance
-- **100+ Activities**: Comprehensive checklist covering all ISO 9001 requirements
+- **100+ Activities**: Comprehensive checklist covering all ISO 9001/IATF 16949 requirements
 - **Timeline Management**: Automated phase scheduling with date picker integration
 - **Progress Tracking**: Real-time visual progress bars and completion statistics
+- **Implementation Guidance**: Detailed how-to guides for each activity with ISO clauses, step-by-step instructions, and automotive examples
 
 ### 💾 **Data Management**
-- **Local Storage**: Automatic save/restore of all project data
+- **Local Storage**: Automatic save/restore of all project data (persists across sessions)
 - **Export/Import**: JSON-based backup and sharing capabilities
 - **Reset Functionality**: Clean slate option with confirmation dialogs
+- **Logout Feature**: Secure logout while preserving progress data
 
 ### 🎨 **Professional Design**
 - **Brand Integration**: Full PragmaTech Compliance Partners branding
@@ -97,9 +99,10 @@ PCP_9001/
 
 ## 🎯 Target Users
 
-- **Compliance Consultants**: Professional ISO 9001 implementation specialists
-- **Quality Managers**: In-house quality management professionals
-- **Organizations**: Companies seeking ISO 9001 certification
+- **Automotive Suppliers**: Companies implementing ISO 9001/IATF 16949 for automotive certification
+- **Compliance Consultants**: Professional ISO 9001/IATF 16949 implementation specialists
+- **Quality Managers**: In-house quality management professionals in automotive industry
+- **Organizations**: Companies seeking ISO 9001/IATF 16949 certification
 - **Auditors**: Internal and external audit professionals
 
 ## 📋 ISO 9001 Implementation Phases
@@ -158,6 +161,29 @@ open http://localhost:8000
 - **iso9001_plan.js**: Complete ISO 9001 project data structure
 - **index.html**: Semantic HTML structure with accessibility features
 
+## 💾 Data Storage Strategy
+
+### **Automatic Progress Persistence**
+- **LocalStorage**: All project progress is automatically saved to your browser's local storage
+- **Real-time Saving**: Every task completion, date change, and configuration is immediately saved
+- **Session Persistence**: Your progress remains even after closing the browser or logging out
+
+### **Backup & Recovery**
+- **Export Functionality**: Download your complete project data as JSON files
+- **Import Capability**: Restore progress from previously exported files
+- **Recommended Practice**: Export your data regularly as backup, especially before major milestones
+
+### **Data Security**
+- **Client-side Only**: All data remains on your local machine - nothing is sent to external servers
+- **No Account Required**: No registration or personal data collection
+- **Privacy Focused**: Your implementation progress stays completely private
+
+### **Best Practices**
+1. **Regular Exports**: Export your data weekly or at each phase completion
+2. **Multiple Backups**: Keep exports in different locations (cloud storage, USB drives)
+3. **Team Sharing**: Use export/import to share progress with team members or consultants
+4. **Version Control**: Name exports with dates (e.g., `iso9001-project-2025-01-15.json`)
+
 ## 📄 License
 
 © 2025 PragmaTech Compliance Partners. All rights reserved.
@@ -165,9 +191,9 @@ open http://localhost:8000
 ## 📞 Contact
 
 **PragmaTech Compliance Partners**
-- Website: [pragmatech-compliance-partners.vercel.app](https://pragmatech-compliance-partners.vercel.app/)
-- Email: pragmaticcompliancepartners@gmail.com
+- Website: [pragmatechcompliance.com](https://pragmatechcompliance.com/)
+- Email: contact@pragmatechcompliance.com
 
 ---
 
-*Professional ISO 9001 implementation made simple and efficient.* 
+*Professional ISO 9001/IATF 16949 implementation made simple and efficient with comprehensive guidance.* 
