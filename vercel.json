@@ -26,6 +26,10 @@
       "destination": "/iso9001-tracker/iso9001_plan.js"
     },
     {
+      "source": "/document_checklist.js",
+      "destination": "/iso9001-tracker/document_checklist.js"
+    },
+    {
       "source": "/pcp-logo.svg",
       "destination": "/iso9001-tracker/pcp-logo.svg"
     }
