@@ -49,6 +49,17 @@
                     </div>
                     
                     <div class="control-group">
+                        <div class="view-toggles">
+                            <button id="view-project-btn" class="btn btn-primary view-toggle active" title="View project tracker">
+                                📋 Project Tracker
+                            </button>
+                            <button id="view-documents-btn" class="btn btn-secondary view-toggle" title="View document checklist">
+                                📄 Document Checklist
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="control-group">
                         <div class="action-buttons">
                             <button id="export-btn" class="btn btn-secondary" title="Export project data">
                                 📥 Export
@@ -96,8 +107,41 @@
 
         <!-- Main Content - Project Phases -->
         <main class="main-content">
-            <div class="phases-container" id="phases-container">
-                <!-- Phases will be generated dynamically from JavaScript -->
+            <!-- Project Tracker View -->
+            <div class="tracker-view" id="tracker-view">
+                <div class="phases-container" id="phases-container">
+                    <!-- Phases will be generated dynamically from JavaScript -->
+                </div>
+            </div>
+            
+            <!-- Document Checklist View -->
+            <div class="documents-view" id="documents-view" style="display: none;">
+                <!-- Document Filter and Search -->
+                <div class="documents-header">
+                    <div class="documents-controls">
+                        <div class="search-group">
+                            <input type="text" id="document-search" class="search-input" placeholder="Search documents...">
+                        </div>
+                        <div class="filter-group">
+                            <select id="document-filter" class="filter-select">
+                                <option value="all">All Documents</option>
+                                <option value="mandatory">Mandatory Only</option>
+                                <option value="not-mandatory">Not Mandatory</option>
+                                <option value="nice-to-have">Nice to Have</option>
+                                <option value="completed">Completed</option>
+                                <option value="pending">Pending</option>
+                            </select>
+                        </div>
+                        <div class="progress-summary" id="document-progress">
+                            <span id="document-progress-text">0 / 0 documents completed (0%)</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Document Categories -->
+                <div class="documents-container" id="documents-container">
+                    <!-- Document categories will be generated dynamically from JavaScript -->
+                </div>
             </div>
         </main>
 
@@ -180,6 +224,7 @@
 
     <!-- Scripts -->
     <script src="iso9001_plan.js"></script>
+    <script src="document_checklist.js"></script>
     <script src="app.js"></script>
     
     <!-- Initialize DayJS plugins -->

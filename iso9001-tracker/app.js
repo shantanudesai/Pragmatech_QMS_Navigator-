@@ -11,12 +11,15 @@ class ISO9001Tracker {
             activities: new Map(), // Map of activity ID to completion status
             expandedPhases: new Set(), // Set of expanded phase IDs
             isLoading: false,
-            isAuthenticated: false
+            isAuthenticated: false,
+            currentView: 'project', // 'project' or 'documents'
+            expandedCategories: new Set() // Set of expanded document category IDs
         };
         
         this.elements = {};
         this.datePicker = null;
         this.correctPassword = 'PragmaTech@2025#9001';
+        this.documentManager = new DocumentChecklistManager();
         
         this.init();
     }
@@ -191,7 +194,16 @@ class ISO9001Tracker {
             modalCancel: document.getElementById('modal-cancel'),
             modalClose: document.getElementById('modal-close'),
             loadingOverlay: document.getElementById('loading-overlay'),
-            toastContainer: document.getElementById('toast-container')
+            toastContainer: document.getElementById('toast-container'),
+            // Document checklist elements
+            viewProjectBtn: document.getElementById('view-project-btn'),
+            viewDocumentsBtn: document.getElementById('view-documents-btn'),
+            trackerView: document.getElementById('tracker-view'),
+            documentsView: document.getElementById('documents-view'),
+            documentSearch: document.getElementById('document-search'),
+            documentFilter: document.getElementById('document-filter'),
+            documentProgressText: document.getElementById('document-progress-text'),
+            documentsContainer: document.getElementById('documents-container')
         };
     }
 
@@ -247,6 +259,21 @@ class ISO9001Tracker {
                 if (parsedState.expandedPhases) {
                     this.state.expandedPhases = new Set(parsedState.expandedPhases);
                 }
+                
+                // Restore current view
+                if (parsedState.currentView) {
+                    this.state.currentView = parsedState.currentView;
+                }
+                
+                // Restore expanded categories
+                if (parsedState.expandedCategories) {
+                    this.state.expandedCategories = new Set(parsedState.expandedCategories);
+                }
+                
+                // Restore document states
+                if (parsedState.documents) {
+                    this.documentManager.importData({ documents: parsedState.documents });
+                }
             }
         } catch (error) {
             console.warn('Failed to load state from localStorage:', error);
@@ -261,7 +288,10 @@ class ISO9001Tracker {
             const stateToSave = {
                 projectStartDate: this.state.projectStartDate ? this.state.projectStartDate.toISOString() : null,
                 activities: Object.fromEntries(this.state.activities),
-                expandedPhases: Array.from(this.state.expandedPhases)
+                expandedPhases: Array.from(this.state.expandedPhases),
+                currentView: this.state.currentView,
+                expandedCategories: Array.from(this.state.expandedCategories),
+                documents: Object.fromEntries(this.documentManager.documents)
             };
             
             localStorage.setItem('iso9001-tracker-state', JSON.stringify(stateToSave));
@@ -294,6 +324,10 @@ class ISO9001Tracker {
      * Bind event listeners
      */
     bindEvents() {
+        // View toggle functionality
+        this.elements.viewProjectBtn.addEventListener('click', () => this.switchToView('project'));
+        this.elements.viewDocumentsBtn.addEventListener('click', () => this.switchToView('documents'));
+        
         // Export functionality
         this.elements.exportBtn.addEventListener('click', () => this.exportData());
         
@@ -306,6 +340,10 @@ class ISO9001Tracker {
         
         // Logout functionality
         this.elements.logoutBtn.addEventListener('click', () => this.showLogoutConfirmation());
+        
+        // Document search and filter
+        this.elements.documentSearch.addEventListener('input', (e) => this.filterDocuments());
+        this.elements.documentFilter.addEventListener('change', (e) => this.filterDocuments());
         
         // Modal events
         this.elements.modalClose.addEventListener('click', () => this.hideModal());
@@ -334,6 +372,9 @@ class ISO9001Tracker {
         this.renderPhaseTimeline();
         this.renderPhases();
         this.updateTimeline();
+        this.updateViewToggle();
+        this.renderDocuments();
+        this.updateDocumentProgress();
     }
 
     /**
@@ -660,6 +701,275 @@ class ISO9001Tracker {
     }
 
     /**
+     * Switch between project tracker and document checklist views
+     */
+    switchToView(view) {
+        this.state.currentView = view;
+        this.updateViewToggle();
+        this.saveStateToStorage();
+    }
+
+    /**
+     * Update view toggle buttons and show/hide appropriate content
+     */
+    updateViewToggle() {
+        // Update button states
+        if (this.state.currentView === 'project') {
+            this.elements.viewProjectBtn.classList.add('active');
+            this.elements.viewProjectBtn.classList.remove('btn-secondary');
+            this.elements.viewProjectBtn.classList.add('btn-primary');
+            
+            this.elements.viewDocumentsBtn.classList.remove('active');
+            this.elements.viewDocumentsBtn.classList.remove('btn-primary');
+            this.elements.viewDocumentsBtn.classList.add('btn-secondary');
+            
+            // Show project view, hide documents view
+            this.elements.trackerView.style.display = 'block';
+            this.elements.documentsView.style.display = 'none';
+        } else {
+            this.elements.viewDocumentsBtn.classList.add('active');
+            this.elements.viewDocumentsBtn.classList.remove('btn-secondary');
+            this.elements.viewDocumentsBtn.classList.add('btn-primary');
+            
+            this.elements.viewProjectBtn.classList.remove('active');
+            this.elements.viewProjectBtn.classList.remove('btn-primary');
+            this.elements.viewProjectBtn.classList.add('btn-secondary');
+            
+            // Show documents view, hide project view
+            this.elements.trackerView.style.display = 'none';
+            this.elements.documentsView.style.display = 'block';
+        }
+    }
+
+    /**
+     * Filter and render documents based on search and filter criteria
+     */
+    filterDocuments() {
+        const searchTerm = this.elements.documentSearch.value;
+        const filterValue = this.elements.documentFilter.value;
+        
+        const filteredCategories = this.documentManager.filterDocuments(filterValue, searchTerm);
+        this.renderFilteredDocuments(filteredCategories);
+    }
+
+    /**
+     * Render documents container
+     */
+    renderDocuments() {
+        const filteredCategories = this.documentManager.filterDocuments('all', '');
+        this.renderFilteredDocuments(filteredCategories);
+    }
+
+    /**
+     * Render filtered document categories
+     */
+    renderFilteredDocuments(categories) {
+        const container = this.elements.documentsContainer;
+        container.innerHTML = '';
+
+        categories.forEach(category => {
+            const categoryElement = this.createDocumentCategoryElement(category);
+            container.appendChild(categoryElement);
+        });
+    }
+
+    /**
+     * Create a document category element
+     */
+    createDocumentCategoryElement(category) {
+        const categoryCard = document.createElement('div');
+        categoryCard.className = 'document-category';
+        categoryCard.dataset.categoryId = category.id;
+
+        // Calculate category completion
+        const categoryDocuments = category.documents.map(doc => doc.id);
+        const completedCount = categoryDocuments.filter(id => this.documentManager.isDocumentCompleted(id)).length;
+        const totalCount = categoryDocuments.length;
+        const isCompleted = completedCount === totalCount && totalCount > 0;
+        const isInProgress = completedCount > 0 && !isCompleted;
+        
+        if (isCompleted) {
+            categoryCard.classList.add('completed');
+        } else if (isInProgress) {
+            categoryCard.classList.add('in-progress');
+        }
+
+        const isExpanded = this.state.expandedCategories.has(category.id);
+
+        categoryCard.innerHTML = `
+            <div class="category-header" data-category-id="${category.id}">
+                <div class="category-title-row">
+                    <div class="category-title">
+                        <div class="category-number">${category.order}</div>
+                        <div class="category-name">${category.title}</div>
+                    </div>
+                    <div class="category-status">
+                        <div class="category-progress">
+                            ${completedCount}/${totalCount} documents
+                        </div>
+                        <button class="category-toggle ${isExpanded ? 'expanded' : ''}" 
+                                data-category-id="${category.id}" 
+                                aria-label="Toggle category details">
+                            ▼
+                        </button>
+                    </div>
+                </div>
+                <div class="category-description">${category.description}</div>
+            </div>
+            <div class="category-content ${isExpanded ? 'expanded' : ''}" data-category-id="${category.id}">
+                <div class="documents-list">
+                    ${category.documents.map(document => this.createDocumentHTML(document)).join('')}
+                </div>
+            </div>
+        `;
+
+        // Add event listeners
+        const header = categoryCard.querySelector('.category-header');
+        const toggle = categoryCard.querySelector('.category-toggle');
+        
+        const toggleCategory = (e) => {
+            e.stopPropagation();
+            this.toggleDocumentCategory(category.id);
+        };
+
+        header.addEventListener('click', toggleCategory);
+        toggle.addEventListener('click', toggleCategory);
+
+        // Add document event listeners
+        const checkboxes = categoryCard.querySelectorAll('.document-checkbox');
+        checkboxes.forEach(checkbox => {
+            checkbox.addEventListener('click', (e) => {
+                const documentId = e.target.dataset.documentId;
+                this.toggleDocument(documentId);
+            });
+        });
+
+        // Add document detail toggles
+        const documentToggles = categoryCard.querySelectorAll('.document-toggle');
+        documentToggles.forEach(toggle => {
+            toggle.addEventListener('click', (e) => {
+                const documentId = e.target.dataset.documentId;
+                this.toggleDocumentDetails(documentId);
+            });
+        });
+
+        return categoryCard;
+    }
+
+    /**
+     * Create document HTML
+     */
+    createDocumentHTML(document) {
+        const isCompleted = this.documentManager.isDocumentCompleted(document.id);
+        const tagClass = document.tag.toLowerCase().replace(/\s+/g, '-');
+        
+        return `
+            <div class="document-item ${isCompleted ? 'completed' : ''}">
+                <div class="document-main">
+                    <div class="document-checkbox ${isCompleted ? 'checked' : ''}" 
+                         data-document-id="${document.id}"
+                         role="checkbox"
+                         aria-checked="${isCompleted}"
+                         tabindex="0">
+                    </div>
+                    <div class="document-content">
+                        <div class="document-header">
+                            <div class="document-title">${document.title}</div>
+                            <div class="document-tag ${tagClass}">${document.tag}</div>
+                        </div>
+                        <div class="document-clauses">${document.clauses}</div>
+                        <div class="document-description">${document.description}</div>
+                        <div class="document-actions">
+                            <span class="document-toggle" data-document-id="${document.id}">
+                                💡 Implementation Guide
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="document-details" data-document-id="${document.id}">
+                    <div class="detail-section">
+                        <div class="detail-label">🛠️ Best Way to Create:</div>
+                        <div class="detail-text">${document.bestWayToCreate}</div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    /**
+     * Toggle document category expansion
+     */
+    toggleDocumentCategory(categoryId) {
+        if (this.state.expandedCategories.has(categoryId)) {
+            this.state.expandedCategories.delete(categoryId);
+        } else {
+            this.state.expandedCategories.add(categoryId);
+        }
+
+        // Update UI
+        const categoryCard = document.querySelector(`[data-category-id="${categoryId}"]`);
+        const content = categoryCard.querySelector('.category-content');
+        const toggle = categoryCard.querySelector('.category-toggle');
+
+        if (this.state.expandedCategories.has(categoryId)) {
+            content.classList.add('expanded');
+            toggle.classList.add('expanded');
+        } else {
+            content.classList.remove('expanded');
+            toggle.classList.remove('expanded');
+        }
+
+        this.saveStateToStorage();
+    }
+
+    /**
+     * Toggle document completion status
+     */
+    toggleDocument(documentId) {
+        const wasCompleted = this.documentManager.toggleDocument(documentId);
+        
+        // Update UI
+        this.renderDocuments();
+        this.updateDocumentProgress();
+        this.saveStateToStorage();
+        
+        const action = wasCompleted ? 'completed' : 'uncompleted';
+        this.showToast(`Document ${action}`, 'success');
+    }
+
+    /**
+     * Toggle document details visibility
+     */
+    toggleDocumentDetails(documentId) {
+        const details = document.querySelector(`.document-details[data-document-id="${documentId}"]`);
+        const toggle = document.querySelector(`.document-toggle[data-document-id="${documentId}"]`);
+        
+        if (details && toggle) {
+            const isVisible = details.classList.contains('expanded');
+            if (isVisible) {
+                details.classList.remove('expanded');
+                toggle.textContent = '💡 Implementation Guide';
+                toggle.classList.remove('expanded');
+            } else {
+                details.classList.add('expanded');
+                toggle.textContent = '💡 Hide Guide';
+                toggle.classList.add('expanded');
+            }
+        }
+    }
+
+    /**
+     * Update document progress display
+     */
+    updateDocumentProgress() {
+        const total = this.documentManager.getTotalDocuments();
+        const completed = this.documentManager.getCompletedDocuments();
+        const percentage = this.documentManager.getProgressPercentage();
+
+        this.elements.documentProgressText.textContent = `${completed} / ${total} documents completed (${percentage}%)`;
+    }
+
+    /**
      * Export project data
      */
     exportData() {
@@ -667,28 +977,32 @@ class ISO9001Tracker {
             const exportData = {
                 metadata: {
                     exportDate: new Date().toISOString(),
-                    version: '1.0',
-                    projectTitle: this.state.projectData.title
+                    version: '1.1',
+                    projectTitle: this.state.projectData.title,
+                    documentCount: this.documentManager.getTotalDocuments()
                 },
                 projectStartDate: this.state.projectStartDate ? this.state.projectStartDate.toISOString() : null,
                 activities: Object.fromEntries(this.state.activities),
-                expandedPhases: Array.from(this.state.expandedPhases)
+                expandedPhases: Array.from(this.state.expandedPhases),
+                currentView: this.state.currentView,
+                expandedCategories: Array.from(this.state.expandedCategories),
+                documents: Object.fromEntries(this.documentManager.documents)
             };
 
             const dataStr = JSON.stringify(exportData, null, 2);
             const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
             
-            const exportFileDefaultName = `iso9001-project-${dayjs().format('YYYY-MM-DD')}.json`;
+            const exportFileDefaultName = `iso9001-tracker-${dayjs().format('YYYY-MM-DD')}.json`;
             
             const linkElement = document.createElement('a');
             linkElement.setAttribute('href', dataUri);
             linkElement.setAttribute('download', exportFileDefaultName);
             linkElement.click();
             
-            this.showToast('Project data exported successfully', 'success');
+            this.showToast('Tracker data exported successfully', 'success');
         } catch (error) {
             console.error('Export failed:', error);
-            this.showToast('Failed to export project data', 'error');
+            this.showToast('Failed to export tracker data', 'error');
         }
     }
 
@@ -765,9 +1079,24 @@ class ISO9001Tracker {
                 this.state.expandedPhases = new Set(importData.expandedPhases);
             }
             
+            // Restore current view
+            if (importData.currentView) {
+                this.state.currentView = importData.currentView;
+            }
+            
+            // Restore expanded categories
+            if (importData.expandedCategories) {
+                this.state.expandedCategories = new Set(importData.expandedCategories);
+            }
+            
+            // Restore document states
+            if (importData.documents) {
+                this.documentManager.importData({ documents: importData.documents });
+            }
+            
             this.render();
             this.saveStateToStorage();
-            this.showToast('Project data imported successfully', 'success');
+            this.showToast('Tracker data imported successfully', 'success');
             
         } catch (error) {
             console.error('Failed to apply import data:', error);
@@ -796,6 +1125,11 @@ class ISO9001Tracker {
             this.state.activities.set(activityId, false);
         });
         this.state.expandedPhases.clear();
+        this.state.currentView = 'project';
+        this.state.expandedCategories.clear();
+        
+        // Reset document manager
+        this.documentManager.resetDocuments();
 
         // Reset UI
         if (this.datePicker) {
@@ -804,7 +1138,7 @@ class ISO9001Tracker {
         
         this.render();
         this.saveStateToStorage();
-        this.showToast('Project reset successfully', 'success');
+        this.showToast('Tracker reset successfully', 'success');
     }
 
     /**
